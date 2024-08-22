@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Parser</title>
+    <style>
+        div.content {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>Привет, мир!</h1>
+</div>
+<div class="content">
+    <h2>Содержание</h2>
+    <p>Это пример контента, который будет скрыт.</p>
+</div>
+<div class="footer">
+    <p>Это подвал.</p>
+</div>
+
+<div id="output"></div>
+
+<script>
+    // Функция для рекурсивного парсинга элемента
+    function parseElement(element) {
+        let obj = {
+            tag: element.tagName.toLowerCase(),
+            attributes: {},
+            children: []
+        };
+
+        // Получение атрибутов элемента
+        for (let attr of element.attributes) {
+            obj.attributes[attr.name] = attr.value;
+        }
+
+        // Рекурсивный обход дочерних элементов
+        for (let child of element.children) {
+            obj.children.push(parseElement(child));
+        }
+
+        return obj;
+    }
+
+    // Получение корневого элемента для парсинга
+    const rootElement = document.body; // или другой элемент
+    const parsedHTML = parseElement(rootElement);
+
+    // Функция для создания иерархического списка
+    function createListFromObject(obj) {
+        const list = document.createElement('ul');
+        const listItem = document.createElement('li');
+
+        listItem.textContent = obj.tag;
+        const attrs = document.createElement('ul');
+
+        for (let key in obj.attributes) {
+            const attrItem = document.createElement('li');
+            attrItem.textContent = `${key}: ${obj.attributes[key]}`;
+            attrs.appendChild(attrItem);
+        }
+
+        listItem.appendChild(attrs);
+        list.appendChild(listItem);
+
+        for (let child of obj.children) {
+            list.appendChild(createListFromObject(child));
+        }
+
+        return list;
+    }
+
+    // Вывод результата
+    const outputDiv = document.getElementById('output');
+    const hierarchyList = createListFromObject(parsedHTML);
+    outputDiv.appendChild(hierarchyList);
+</script>
+</body>
+</html>
